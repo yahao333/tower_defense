@@ -2,11 +2,11 @@ import pygame
 import math
 
 class Enemy:
-    def __init__(self, pos):
+    def __init__(self, pos, health=100, speed=2):
         self.pos = list(pos)
-        self.speed = 2
-        self.health = 100
-        self.max_health = 100
+        self.speed = speed
+        self.health = health
+        self.max_health = health
         self.radius = 15
         self.path_index = 0
     

@@ -1,12 +1,9 @@
 import pygame
 from tower import Tower
 from enemy import Enemy
+from levels import LEVELS
 
 class Game:
-    def spawn_enemies(self):
-        for i in range(5):
-            self.enemies.append(Enemy((-50 - i * 50, 300)))
-
     def __init__(self, screen):
         self.screen = screen
         self.towers = []
@@ -14,14 +11,27 @@ class Game:
         self.money = 100
         self.lives = 20
         self.wave = 1
-        self.path = [(0, 300), (800, 300)]  # 简单的直线路径
+        self.current_level = LEVELS[1]  # 从第一关开始
+        self.path = self.current_level['path']
+        self.spawn_timer = 0
+        self.enemies_spawned = 0
+        
+    def spawn_enemies(self):
+        if self.spawn_timer <= 0 and self.enemies_spawned < self.current_level['enemies']:
+            self.enemies.append(Enemy(
+                pos=(-50, self.path[0][1]),
+                health=self.current_level['enemy_health'],
+                speed=self.current_level['enemy_speed']
+            ))
+            self.enemies_spawned += 1
+            self.spawn_timer = self.current_level['spawn_interval']
+        self.spawn_timer -= 1
+    
+    def update(self):
         self.attack_lines = []
         
-        # 初始化敌人
+        # 生成敌人
         self.spawn_enemies()
-        
-    def update(self):
-        self.attack_lines = []  # 清空上一帧的攻击线条
         
         # 更新敌人
         for enemy in self.enemies[:]:
@@ -35,14 +45,18 @@ class Game:
         
         # 更新防御塔
         for tower in self.towers:
-            target = tower.update(self.enemies)  # 获取攻击目标
-            if target:  # 如果有攻击目标，记录攻击线条
+            target = tower.update(self.enemies)
+            if target:
                 self.attack_lines.append((tower.pos, (target.pos[0], target.pos[1])))
         
-        # 检查是否需要生成新的一波敌人
-        if not self.enemies:
+        # 检查是否需要进入下一关
+        if not self.enemies and self.enemies_spawned >= self.current_level['enemies']:
             self.wave += 1
-            self.spawn_enemies()
+            if self.wave <= len(LEVELS):
+                self.current_level = LEVELS[self.wave]
+                self.path = self.current_level['path']
+                self.enemies_spawned = 0
+                self.spawn_timer = 0
     
     def draw(self):
         # 绘制背景
