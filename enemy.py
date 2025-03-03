@@ -10,6 +10,10 @@ class Enemy:
         self.radius = 15
         self.path_index = 0
     
+    def reached_end(self):
+        # 修改判断条件：当敌人到达路径终点时返回True
+        return self.path_index >= 1 and self.pos[0] >= 800
+    
     def move(self, path):
         target = path[min(self.path_index + 1, len(path) - 1)]
         dx = target[0] - self.pos[0]
@@ -28,10 +32,13 @@ class Enemy:
     def take_damage(self, damage):
         self.health -= damage
     
-    def reached_end(self):
-        return self.pos[0] > 800
-    
     def draw(self, screen):
+        # 绘制起点和终点
+        start_pos = (0, 300)
+        end_pos = (800, 300)
+        pygame.draw.circle(screen, (0, 255, 0), start_pos, 25)  # 绿色起点
+        pygame.draw.circle(screen, (255, 0, 0), end_pos, 25)    # 红色终点
+        
         # 绘制敌人
         pygame.draw.circle(screen, (255, 0, 0), 
                          (int(self.pos[0]), int(self.pos[1])), self.radius)
