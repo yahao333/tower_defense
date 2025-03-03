@@ -11,10 +11,11 @@ class Enemy:
         self.path_index = 0
     
     def reached_end(self):
-        # 修改判断条件：当敌人到达路径终点时返回True
-        return self.path_index >= 1 and self.pos[0] >= 800
+        # 检查敌人是否到达最后一个路径点
+        return self.path_index >= len(self.current_path) - 1
     
     def move(self, path):
+        self.current_path = path  # 保存当前路径以供 reached_end 使用
         target = path[min(self.path_index + 1, len(path) - 1)]
         dx = target[0] - self.pos[0]
         dy = target[1] - self.pos[1]
@@ -23,22 +24,18 @@ class Enemy:
         if distance < self.speed:
             self.path_index += 1
             if self.path_index >= len(path) - 1:
-                return
+                return True  # 到达终点
         
         if distance != 0:
             self.pos[0] += (dx/distance) * self.speed
             self.pos[1] += (dy/distance) * self.speed
+        
+        return False  # 未到达终点
     
     def take_damage(self, damage):
         self.health -= damage
     
     def draw(self, screen):
-        # 绘制起点和终点
-        start_pos = (0, 300)
-        end_pos = (800, 300)
-        pygame.draw.circle(screen, (0, 255, 0), start_pos, 25)  # 绿色起点
-        pygame.draw.circle(screen, (255, 0, 0), end_pos, 25)    # 红色终点
-        
         # 绘制敌人
         pygame.draw.circle(screen, (255, 0, 0), 
                          (int(self.pos[0]), int(self.pos[1])), self.radius)
